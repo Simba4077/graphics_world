@@ -11,7 +11,7 @@ var VSHADER_SOURCE = `
   uniform mat4 u_ProjectionMatrix;
   void main() {
     gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-    v_UV = a_UV;  
+    v_UV = a_UV;
   }
 `;
 
@@ -22,7 +22,7 @@ var FSHADER_SOURCE = `
   uniform vec4 u_FragColor;
   void main() {
     gl_FragColor = u_FragColor;
-    //gl_FragColor = vec4(v_UV, 1.0, 1.0);
+    gl_FragColor = vec4(u_UV, 1.0, 1.0);
   }
 `;
 
@@ -30,11 +30,11 @@ var FSHADER_SOURCE = `
 let canvas;
 let gl;
 let a_Position
-let a_UV;
 let u_FragColor;
+let u_Size;
 let u_ModelMatrix;
-let u_ViewMatrix;
 let u_ProjectionMatrix;
+let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 
 function setupWebGL() {
@@ -48,6 +48,7 @@ function setupWebGL() {
     return;
   }
   gl.enable(gl.DEPTH_TEST);
+
 }
 
 function connectVariablesToGLSL() {
@@ -64,7 +65,7 @@ function connectVariablesToGLSL() {
   }
 
   a_UV = gl.getAttribLocation(gl.program, 'a_UV');
-  if (a_UV < 0) {
+  if (a_UV < 0){
     console.log('Failed to get the storage location of a_UV');
     return;
   }
@@ -88,15 +89,9 @@ function connectVariablesToGLSL() {
     return;
   }
 
-  u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  if(!u_ViewMatrix) {
-    console.log('Failed to get the storage location of u_ViewMatrix');
-    return;
-  }
-
-  u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix');
-  if(!u_ProjectionMatrix) {
-    console.log('Failed to get the storage location of u_ProjectionMatrix');
+  u_ViewMatrix = gl.getAttribLocation(gl.program, 'u_ViewMatrix');
+  if (!u_ViewMatrix){
+    console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
 
@@ -111,10 +106,22 @@ const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
 
+// Global variables related to UI elements
+let g_selectedColor=[1.0, 1.0, 1.0, 1.0];
+let g_selectedSize = 5;
+let g_selectedType = POINT;
+let g_globalAngle = 0;
+let g_yellowAngle = 0;
+let g_magentaAngle = 0;
 
-//function addActionsForHtmlUI(){
-  //button events
-//}
+
+
+function addActionsForHtmlUI(){
+  //angle slider events
+  document.getElementById('angleSlide').addEventListener('mousemove', function() {g_globalAngle=this.value; renderAllShapes();});
+  document.getElementById('magentaSlide').addEventListener('mousemove', function() { g_magentaAngle = this.value; renderAllShapes();});
+  document.getElementById('yellowSlide').addEventListener('mousemove', function() { g_yellowAngle = this.value; renderAllShapes();});
+}
 
 function main() {
   // Retrieve <canvas> element
@@ -124,29 +131,25 @@ function main() {
   connectVariablesToGLSL();
 
   //set up actions for HTML UI elements
-  //addActionsForHtmlUI();
+  addActionsForHtmlUI();
+ 
+  // Register function (event handler) to be called on a mouse press
+  canvas.onmousedown = click;
+  canvas.onmousemove = function(ev) { if (ev.buttons == 1){ click(ev) } };
 
   // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0); // sky blue
+  gl.clearColor(0.0, 0.2, 0.2, 1.0);
 
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+  renderAllShapes();
 }
 
-var g_startTime = performance.now()/1000.0;
-var g_seconds = performance.now()/1000.0 - g_startTime;
-
-
-function tick() {
-  g_seconds = performance.now()/1000.0 - g_startTime;
-  cloudOffset = (-g_seconds*CLOUD_SPEED) % CLOUD_TILE;
-  requestAnimationFrame(tick);
-}
 
 
 var g_shapesList = [];
+
+// var g_points = [];  // The array for the position of a mouse press
+// var g_colors = [];  // The array to store the color of a point
+// var g_sizes = [];   // The array to store the size of a point
 
 function click(ev) {
   //extract event click and convert coordinates to webGL coordinates
@@ -163,7 +166,12 @@ function click(ev) {
   }
   point.position=[x, y];
   point.color=g_selectedColor.slice();
+  point.color[3] = g_alpha;
+  point.size=g_selectedSize;
+  point.segments=g_selectedSegments;
   g_shapesList.push(point);
+  
+  renderAllShapes();
 }
 
 function convertCoordinatesEventToGL(ev) {
@@ -176,6 +184,57 @@ function convertCoordinatesEventToGL(ev) {
   return([x, y]);
 }
 
+
+
+function renderAllShapes(){
+
+  //check the time at the start of function 
+  var startTime = performance.now();
+
+  var globalRotMat = new Matrix4().rotate(g_globalAngle,0,1,0);
+  gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+  
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+  var body = new Cube();
+  body.color = [1.0, 0.0, 0.0, 1.0];
+  body.matrix.translate(-0.25, -0.75, 0.0);
+  body.matrix.rotate(-5, 1, 0, 0); 
+  body.matrix.scale(0.5, 0.3, 0.5); 
+  body.render();
+
+  //draw a left arm
+  var leftArm = new Cube();
+  leftArm.color = [1.0, 1.0, 0.0, 1.0];
+  leftArm.matrix.setTranslate(0, -0.5, 0.0);
+  leftArm.matrix.rotate(-5, 1, 0, 1);
+  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
+  var yellowCoordinatesMat = new Matrix4(leftArm.matrix);
+  leftArm.matrix.scale(0.25, 0.7, 0.5);
+  leftArm.matrix.translate(-0.5, 0.0, 0.0);
+  leftArm.render();
+
+  //test box
+  var box = new Cube();
+  box.color = [1.0, 0.0, 1.0, 1.0];
+  box.matrix = yellowCoordinatesMat;
+  box.matrix.translate(0.0, 0.65, 0.0);
+  box.matrix.rotate(45,0,0,1);
+  box.matrix.rotate(g_magentaAngle, 0, 0, 1);
+  box.matrix.scale(0.3, 0.3, 0.3);
+  box.matrix.translate(-0.5, 0.0, -0.001);
+  // box.matrix.rotate(-30, 1, 0, 0);
+  // box.matrix.scale(0.2, 0.4, 0.2);
+  box.render();
+
+
+  var duration = performance.now() - startTime;
+  sendTextToHTML(" ms: "+Math.floor(duration) + " fps: " + Math.floor(10000/duration), "numdot")
+
+}
 
 function sendTextToHTML(text, htmlID){
   var htmlElm = document.getElementById(htmlID);
