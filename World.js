@@ -22,7 +22,7 @@ var FSHADER_SOURCE = `
   uniform vec4 u_FragColor;
   void main() {
     gl_FragColor = u_FragColor;
-    gl_FragColor = vec4(u_UV, 1.0, 1.0);
+    //gl_FragColor = vec4(u_UV, 1.0, 1.0);
   }
 `;
 
@@ -31,6 +31,7 @@ let canvas;
 let gl;
 let a_Position
 let u_FragColor;
+let a_UV;
 let u_Size;
 let u_ModelMatrix;
 let u_ProjectionMatrix;
@@ -166,7 +167,6 @@ function click(ev) {
   }
   point.position=[x, y];
   point.color=g_selectedColor.slice();
-  point.color[3] = g_alpha;
   point.size=g_selectedSize;
   point.segments=g_selectedSegments;
   g_shapesList.push(point);
