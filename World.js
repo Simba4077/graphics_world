@@ -90,14 +90,23 @@ function connectVariablesToGLSL() {
     return;
   }
 
-  u_ViewMatrix = gl.getAttribLocation(gl.program, 'u_ViewMatrix');
+  u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
   if (!u_ViewMatrix){
     console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
 
+  u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix');
+  if(!u_ProjectionMatrix) {
+    console.log('Failed to get the storage location of u_ProjectionMatrix');
+    return;
+  }
+
   var identityM = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, identityM.elements);
+  gl.uniformMatrix4fv(u_ViewMatrix, false, identityM.elements);
+
 }
 
 
@@ -139,7 +148,7 @@ function main() {
   canvas.onmousemove = function(ev) { if (ev.buttons == 1){ click(ev) } };
 
   // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.2, 0.2, 1.0);
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
   renderAllShapes();
 }

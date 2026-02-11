@@ -141,7 +141,7 @@ function drawTriangle3DUV(vertices, uv) {
   // Write data into the buffer object
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uv), gl.DYNAMIC_DRAW);
   // Assign the buffer object to a_Position variable
-  gl.vertexAttribPointer(a_UV, 3, gl.FLOAT, false, 0,0);
+  gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0,0);
   // Enable the assignment to a_Position variable
   gl.enableVertexAttribArray(a_UV);
 
