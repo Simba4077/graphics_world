@@ -229,7 +229,7 @@ function renderAllShapes(){
   var box = new Cube();
   box.color = [1.0, 0.0, 1.0, 1.0];
   box.matrix = yellowCoordinatesMat;
-  box.matrix.translate(0.0, 0.65, 0.0);
+  box.matrix.translate(0.0, 0.90, 0.0);
   box.matrix.rotate(45,0,0,1);
   box.matrix.rotate(g_magentaAngle, 0, 0, 1);
   box.matrix.scale(0.3, 0.3, 0.3);
