@@ -140,6 +140,7 @@ let g_selectedColor=[1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5;
 let g_selectedType = POINT;
 let g_globalAngle = 0;
+let g_camera;
 let g_yellowAngle = 0;
 let g_magentaAngle = 0;
 
@@ -215,41 +216,20 @@ function convertCoordinatesEventToGL(ev) {
   return([x, y]);
 }
 
-var g_eye = [0,0,3];
-var g_at = [0,0,-100]
-var g_up = [0,1,0];
 
-//move forward: d = at-eye
-//d=d.normalize()
-//eye=eye+d
-//at=at+d
-
-//move backward: d=at-eye
-//d=d.normalize()
-//eye=eye-d
-//at=at-d
-
-//move left: d=at-eye
-//d=d.normalize()
-//left = d cross up
-//left = left.normalize()
-//eye=eye+left
-//at=at+left
-
-//move right: d=at-eye
-//d=d.normalize()
-//right = -d cross up
-//right = right.normalize()
-//eye=eye+right
-//at=at+right
+g_camera = new Camera();
 
 
 function keydown(ev) {
   // w key == 87, s == 83
   if(ev.keyCode == 68) { //'d' key
-    g_eye[0] += 0.2;
+    g_camera.right();
   } else if(ev.keyCode == 65) { //'a' key
-    g_eye[0] -= 0.2;
+    g_camera.left();
+  } else if(ev.keyCode == 87) { //'w' key
+    g_camera.forward();
+  } else if(ev.keyCode == 83) { //'s' key
+    g_camera.back();
   }
   renderAllShapes();
   console.log(ev.keyCode);
@@ -269,7 +249,14 @@ function renderAllShapes(){
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   var viewMat = new Matrix4();
-  viewMat.setLookAt(g_eye[0],g_eye[1],g_eye[2],  g_at[0],g_at[1],g_at[2],  g_up[0],g_up[1],g_up[2]); //(eye, at, up)
+
+
+  viewMat.setLookAt(
+    g_camera.eye.elements[0], g_camera.eye.elements[1], g_camera.eye.elements[2],
+    g_camera.at.elements[0], g_camera.at.elements[1], g_camera.at.elements[2],
+    g_camera.up.elements[0], g_camera.up.elements[1], g_camera.up.elements[2]
+  ); 
+  
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
   var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
