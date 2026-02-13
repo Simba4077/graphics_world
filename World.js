@@ -128,11 +128,6 @@ function connectVariablesToGLSL() {
     return false;
   }
 
-  var identityM = new Matrix4();
-  gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
-  gl.uniformMatrix4fv(u_ProjectionMatrix, false, identityM.elements);
-  gl.uniformMatrix4fv(u_ViewMatrix, false, identityM.elements);
-
 }
 
 //Constants
@@ -172,6 +167,7 @@ function main() {
   //set up actions for HTML UI elements
   addActionsForHtmlUI();
 
+  document.onkeydown = keydown;
   initTextures();
  
   // Specify the color for clearing <canvas>
@@ -219,6 +215,46 @@ function convertCoordinatesEventToGL(ev) {
   return([x, y]);
 }
 
+var g_eye = [0,0,3];
+var g_at = [0,0,-100]
+var g_up = [0,1,0];
+
+//move forward: d = at-eye
+//d=d.normalize()
+//eye=eye+d
+//at=at+d
+
+//move backward: d=at-eye
+//d=d.normalize()
+//eye=eye-d
+//at=at-d
+
+//move left: d=at-eye
+//d=d.normalize()
+//left = d cross up
+//left = left.normalize()
+//eye=eye+left
+//at=at+left
+
+//move right: d=at-eye
+//d=d.normalize()
+//right = -d cross up
+//right = right.normalize()
+//eye=eye+right
+//at=at+right
+
+
+function keydown(ev) {
+  // w key == 87, s == 83
+  if(ev.keyCode == 68) { //'d' key
+    g_eye[0] += 0.2;
+  } else if(ev.keyCode == 65) { //'a' key
+    g_eye[0] -= 0.2;
+  }
+  renderAllShapes();
+  console.log(ev.keyCode);
+
+}
 
 
 function renderAllShapes(){
@@ -226,9 +262,20 @@ function renderAllShapes(){
   //check the time at the start of function 
   var startTime = performance.now();
 
-  var globalRotMat = new Matrix4().rotate(g_globalAngle,0,1,0);
+
+  var projMat = new Matrix4();
+  //fov is 40, aspect ratio is width/height of canvas, near plane is 0.1, far plane is 100
+  projMat.setPerspective(50, canvas.width/canvas.height, .1, 100);
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+  var viewMat = new Matrix4();
+  viewMat.setLookAt(g_eye[0],g_eye[1],g_eye[2],  g_at[0],g_at[1],g_at[2],  g_up[0],g_up[1],g_up[2]); //(eye, at, up)
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+  var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
-  
+
+
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -236,6 +283,7 @@ function renderAllShapes(){
 
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
+  body.textureNum = 0;
   body.matrix.translate(-0.25, -0.75, 0.0);
   body.matrix.rotate(-5, 1, 0, 0); 
   body.matrix.scale(0.5, 0.3, 0.5); 
