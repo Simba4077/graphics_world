@@ -21,10 +21,22 @@ var FSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform int u_whichTexture;
   void main() {
+
+  if(u_whichTexture == -2) { //Use color
     gl_FragColor = u_FragColor;
-    gl_FragColor = vec4(v_UV, 1.0, 1.0);
-    gl_FragColor = texture2D(u_Sampler0, v_UV);
+
+  } else if(u_whichTexture == -1) {
+    gl_FragColor = vec4(v_UV, 1.0, 1.0); //Use UV color
+
+  } else if(u_whichTexture == 0) {
+    gl_FragColor = texture2D(u_Sampler0, v_UV); //Use texture0
+
+  } else {
+    gl_FragColor = vec4(1.0, 0.2, 0.2, 1.0); //Error color
+  }
+
   }
 `;
 
@@ -34,6 +46,7 @@ let gl;
 let a_Position
 let u_FragColor;
 let a_UV;
+let u_whichTexture;
 let u_Size;
 let u_ModelMatrix;
 let u_ProjectionMatrix;
@@ -60,7 +73,7 @@ function connectVariablesToGLSL() {
     console.log('Failed to intialize shaders.');
     return;
   }
-
+  
   // // Get the storage location of a_Position
   a_Position = gl.getAttribLocation(gl.program, 'a_Position');
   if (a_Position < 0) {
@@ -105,8 +118,11 @@ function connectVariablesToGLSL() {
     return;
   }
 
+  u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+
+
   // Get the storage location of u_Sampler
-  var u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+  u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
   if (!u_Sampler0) {
     console.log('Failed to get the storage location of u_Sampler0');
     return false;
