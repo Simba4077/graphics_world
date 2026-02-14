@@ -282,7 +282,7 @@ function renderAllShapes(){
   floor.color = [0.5, 0.5, 0.5, 1.0];
   floor.textureNum = 1;
   floor.matrix.translate(0, -.75, -0.0);
-  floor.matrix.scale(10, 0.0, 10);
+  floor.matrix.scale(20, 0.0, 20);
   floor.matrix.translate(-.5, 1, -.5);
   floor.render();
 
@@ -376,15 +376,16 @@ function sendImageToTEXTURE0(image) {
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   // Set the texture image
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   
+  gl.generateMipmap(gl.TEXTURE_2D); // Generate mipmap for the texture
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler0, 0);
 
-  console.log("texture 0 loaded");
+  console.log("texture 0 loaded with mipmaps");
 }
 
 function sendImageToTEXTURE1(image) {
@@ -400,16 +401,19 @@ function sendImageToTEXTURE1(image) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
   // Set the texture image
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   
+  gl.generateMipmap(gl.TEXTURE_2D); // Generate mipmap for the texture
+
+    // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
   // Set the texture unit 1 to the sampler
   gl.uniform1i(u_Sampler1, 1);
 
-  console.log("texture 1 loaded");
+  console.log("texture 1 loaded with mapmaps");
   console.log("GL error:", gl.getError()); // Should be 0
 
 }
