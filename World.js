@@ -256,7 +256,7 @@ function renderAllShapes(){
 
   var projMat = new Matrix4();
   //fov is 40, aspect ratio is width/height of canvas, near plane is 0.1, far plane is 100
-  projMat.setPerspective(50, canvas.width/canvas.height, .1, 100);
+  projMat.setPerspective(50, canvas.width/canvas.height, 1, 100);
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   var viewMat = new Matrix4();
@@ -282,7 +282,7 @@ function renderAllShapes(){
   floor.color = [0.5, 0.5, 0.5, 1.0];
   floor.textureNum = 1;
   floor.matrix.translate(0, -.75, -0.0);
-  floor.matrix.scale(20, 0.0, 20);
+  floor.matrix.scale(20, 0.01, 20);
   floor.matrix.translate(-.5, 1, -.5);
   floor.render();
 
@@ -407,10 +407,10 @@ function sendImageToTEXTURE1(image) {
   
   gl.generateMipmap(gl.TEXTURE_2D); // Generate mipmap for the texture
 
-    // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-
-  // Set the texture unit 1 to the sampler
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+    
+// Set the texture unit 1 to the sampler
   gl.uniform1i(u_Sampler1, 1);
 
   console.log("texture 1 loaded with mapmaps");
