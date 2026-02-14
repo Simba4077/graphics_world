@@ -21,6 +21,7 @@ var FSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform sampler2D u_Sampler1;
   uniform int u_whichTexture;
   void main() {
 
@@ -33,7 +34,10 @@ var FSHADER_SOURCE = `
   } else if(u_whichTexture == 0) {
     gl_FragColor = texture2D(u_Sampler0, v_UV); //Use texture0
 
-  } else {
+  } else if(u_whichTexture == 1) {
+    gl_FragColor = texture2D(u_Sampler1, v_UV); //Use texture1
+  } 
+    else {
     gl_FragColor = vec4(1.0, 0.2, 0.2, 1.0); //Error color
   }
 
@@ -53,6 +57,7 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
+let u_Sampler1;
 
 function setupWebGL() {
   canvas = document.getElementById('webgl'); //do not use var, that makes a new local variable instead of using the current global one 
@@ -125,6 +130,12 @@ function connectVariablesToGLSL() {
   u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
   if (!u_Sampler0) {
     console.log('Failed to get the storage location of u_Sampler0');
+    return false;
+  }
+
+  u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+  if (!u_Sampler1) {
+    console.log('Failed to get the storage location of u_Sampler1');
     return false;
   }
 
@@ -265,8 +276,15 @@ function renderAllShapes(){
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.clear(gl.COLOR_BUFFER_BIT);
 
+
+  var floor = new Cube();
+  floor.color = [0.5, 0.5, 0.5, 1.0];
+  floor.textureNum = 1;
+  floor.matrix.translate(0, -.75, -0.0);
+  floor.matrix.scale(10, 0.0, 10);
+  floor.matrix.translate(-.5, 1, -.5);
+  floor.render();
 
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
@@ -332,6 +350,15 @@ function initTextures() {
   image.src = 'sky.jpg';
 
   //add more textures here
+  var image1 = new Image();
+  if (!image1) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  image1.onload = function(){ sendImageToTEXTURE1(image1); };
+  image1.onerror = function() { console.log('Failed to load uvgrid.png'); };  // Add this
+
+  image1.src = 'uvgrid.png';
 
   return true;
 }
@@ -357,5 +384,32 @@ function sendImageToTEXTURE0(image) {
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler0, 0);
 
-  console.log("texture loaded");
+  console.log("texture 0 loaded");
+}
+
+function sendImageToTEXTURE1(image) {
+  console.log("sendImageToTEXTURE1 called");
+  console.log("Image dimensions:", image.width, image.height);
+  
+  var texture = gl.createTexture();
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  
+  // Set the texture unit 1 to the sampler
+  gl.uniform1i(u_Sampler1, 1);
+
+  console.log("texture 1 loaded");
+  console.log("GL error:", gl.getError()); // Should be 0
+
 }

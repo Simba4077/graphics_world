@@ -3,7 +3,7 @@ class Cube{
     this.type='cube';
     this.color=[1.0,1.0,1.0,1.0];
     this.matrix = new Matrix4(); //uncomment when using 
-    this.textureNum = -1; //use texture 0 as default
+    this.textureNum = -1; //use UV color as default
   }
 
   render(){

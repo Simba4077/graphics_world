@@ -22,7 +22,7 @@ class Camera{
     left(){
         var f = this.at.sub(this.eye);
         f = f.div(f.magnitude());
-        var s = Vector3.cross(f, this.up);  // left is f×up
+        var s = Vector3.cross(f,this.up);  // Changed: up × f
         s = s.div(s.magnitude());
         this.eye = this.eye.add(s);
         this.at = this.at.add(s);
@@ -31,9 +31,10 @@ class Camera{
     right(){
         var f = this.at.sub(this.eye);
         f = f.div(f.magnitude());
-        var s = Vector3.cross(f, this.up);  // same as left
+        var s = Vector3.cross(f,this.up);  // Changed: up × f
+        s = new Vector3([-s.elements[0], -s.elements[1], -s.elements[2]]); // Changed: negate s
         s = s.div(s.magnitude());
-        this.eye = this.eye.sub(s);         // Changed: subtract instead
-        this.at = this.at.sub(s);           // Changed: subtract instead
-    }   
+        this.eye = this.eye.add(s);
+        this.at = this.at.add(s);
+    }
 }
