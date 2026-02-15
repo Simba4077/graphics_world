@@ -230,21 +230,46 @@ function convertCoordinatesEventToGL(ev) {
 
 g_camera = new Camera();
 
+var g_map = [
+  [1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,0,1,1,0,0,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,0,0,1,0,0,1],
+  [1,0,0,0,0,0,0,1],
+];
+
+function drawMap(){
+  for(x=0; x<8;x++){
+    for(y=0;y<8;y++){
+      if(g_map[x][y] == 1){
+        var body = new Cube();
+        body.color = [1.0, 0.0, 0.0, 1.0];
+        body.matrix.translate(x-4, -0.75, y-4);
+        body.render();
+     }  
+    }
+  }
+}
+
 
 function keydown(ev) {
-  // w key == 87, s == 83
-  if(ev.keyCode == 68) { //'d' key
-    g_camera.right();
-  } else if(ev.keyCode == 65) { //'a' key
-    g_camera.left();
-  } else if(ev.keyCode == 87) { //'w' key
-    g_camera.forward();
-  } else if(ev.keyCode == 83) { //'s' key
-    g_camera.back();
-  }
-  renderAllShapes();
-  console.log(ev.keyCode);
-
+    if(ev.keyCode == 87) { // W
+        g_camera.forward();
+    } else if(ev.keyCode == 83) { // S
+        g_camera.back();
+    } else if(ev.keyCode == 65) { // A
+        g_camera.left();
+    } else if(ev.keyCode == 68) { // D
+        g_camera.right();
+    } else if(ev.keyCode == 81) { // Q
+        g_camera.panLeft();
+    } else if(ev.keyCode == 69) { // E
+        g_camera.panRight();
+    }
+    renderAllShapes();
 }
 
 
@@ -277,6 +302,15 @@ function renderAllShapes(){
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+
+  drawMap();
+
+  var sky = new Cube();
+  sky.color = [0.5, 0.5, 0.5, 1.0];
+  sky.textureNum = 0;
+  sky.matrix.scale(50,50,50);
+  sky.matrix.translate(-0.5, -0.5, -0.5);
+  sky.render();
 
   var floor = new Cube();
   floor.color = [0.5, 0.5, 0.5, 1.0];
