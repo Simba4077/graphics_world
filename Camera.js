@@ -16,15 +16,18 @@ class Camera{
         }
         // Normalize
         f.normalize();
-        // eye += f; at += f;
-        this.eye = this.eye.add(f);
-        this.at = this.at.add(f);
-
-        //prevent going below ground level
-        if(this.eye.elements[1] < this.groundLevel) {
-            var correction = this.groundLevel - this.eye.elements[1];
-            this.eye.elements[1] += this.groundLevel;
-            this.at.elements[1] += correction;
+     var newEye = this.eye.add(f);
+        var newAt = this.at.add(f);
+        
+        // Check if new position would be below ground
+        if (newEye.elements[1] >= this.groundLevel) {
+            this.eye = newEye;
+            this.at = newAt;
+        } else {
+            // Clamp to ground level
+            var yDiff = this.eye.elements[1] - newEye.elements[1];
+            this.eye.elements[1] = this.groundLevel;
+            this.at.elements[1] += yDiff;
         }
     }
 
@@ -38,14 +41,18 @@ class Camera{
         }
         // Normalize
         b.normalize();
-        // eye += b; at += b;
-        this.eye = this.eye.add(b);
-        this.at = this.at.add(b);
-        //prevent going below ground level
-        if(this.eye.elements[1] < this.groundLevel) {
-            var correction = this.groundLevel - this.eye.elements[1];
-            this.eye.elements[1] += this.groundLevel;
-            this.at.elements[1] += correction;
+     var newEye = this.eye.add(f);
+        var newAt = this.at.add(f);
+        
+        // Check if new position would be below ground
+        if (newEye.elements[1] >= this.groundLevel) {
+            this.eye = newEye;
+            this.at = newAt;
+        } else {
+            // Clamp to ground level
+            var yDiff = this.eye.elements[1] - newEye.elements[1];
+            this.eye.elements[1] = this.groundLevel;
+            this.at.elements[1] += yDiff;
         }
     }
 
@@ -61,15 +68,18 @@ class Camera{
         }
         // Normalize
         s.normalize();
-        // eye += s; at += s;
-        this.eye = this.eye.add(s);
-        this.at = this.at.add(s);
-
-        //prevent going below ground level
-        if(this.eye.elements[1] < this.groundLevel) {
-            var correction = this.groundLevel - this.eye.elements[1];
-            this.eye.elements[1] += this.groundLevel;
-            this.at.elements[1] += correction;
+     var newEye = this.eye.add(f);
+        var newAt = this.at.add(f);
+        
+        // Check if new position would be below ground
+        if (newEye.elements[1] >= this.groundLevel) {
+            this.eye = newEye;
+            this.at = newAt;
+        } else {
+            // Clamp to ground level
+            var yDiff = this.eye.elements[1] - newEye.elements[1];
+            this.eye.elements[1] = this.groundLevel;
+            this.at.elements[1] += yDiff;
         }
     }
 
@@ -85,14 +95,18 @@ class Camera{
         }
         // Normalize
         s.normalize();
-        // eye += s; at += s;
-        this.eye = this.eye.add(s);
-        this.at = this.at.add(s);
-        //prevent going below ground level
-        if(this.eye.elements[1] < this.groundLevel) {
-            var correction = this.groundLevel - this.eye.elements[1];
-            this.eye.elements[1] += this.groundLevel;
-            this.at.elements[1] += correction;
+     var newEye = this.eye.add(f);
+        var newAt = this.at.add(f);
+        
+        // Check if new position would be below ground
+        if (newEye.elements[1] >= this.groundLevel) {
+            this.eye = newEye;
+            this.at = newAt;
+        } else {
+            // Clamp to ground level
+            var yDiff = this.eye.elements[1] - newEye.elements[1];
+            this.eye.elements[1] = this.groundLevel;
+            this.at.elements[1] += yDiff;
         }
     }
 
