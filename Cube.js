@@ -47,50 +47,53 @@ class Cube{
   }
 
 
-  renderfast(){
+renderfast(){
     var rgba = this.color;
-
-    gl.uniform1i(u_whichTexture, this.textureNum); //set the texture number
-    // Pass the color of a point to u_FragColor variable
+    gl.uniform1i(u_whichTexture, this.textureNum);
     gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
-    //Pass the matrix to u_ModelMatrix
     gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-    var allverts = [];
-    //front cube
-    allverts = allverts.concat( [0.0,0.0,0.0,  1.0,1.0,0.0,  1.0,0.0,0.0] ); //verts
-    allverts = allverts.concat( [0,0, 1,1, 1,0] ); //uvs
-    allverts = allverts.concat( [0.0,0.0,0.0,  0.0,1.0,0.0,  1.0,1.0,0.0] );
-    allverts = allverts.concat( [0,0, 0,1, 1,1] );
+    var positions = [];
+    var uvs = [];
+    
+    // Front face
+    positions = positions.concat([0.0,0.0,0.0,  1.0,1.0,0.0,  1.0,0.0,0.0]);
+    uvs = uvs.concat([0,0, 1,1, 1,0]);
+    positions = positions.concat([0.0,0.0,0.0,  0.0,1.0,0.0,  1.0,1.0,0.0]);
+    uvs = uvs.concat([0,0, 0,1, 1,1]);
 
-    allverts = allverts.concat( [0.0,1.0,0.0,  0.0,1.0,1.0,  1.0,1.0,1.0] );
-    allverts = allverts.concat( [0,1, 0,0, 1,0] );
-    allverts = allverts.concat( [0.0,1.0,0.0,  1.0,1.0,1.0,  1.0,1.0,0.0] );
-    allverts = allverts.concat( [0,1, 1,0, 1,1] );
+    // Top
+    positions = positions.concat([0.0,1.0,0.0,  0.0,1.0,1.0,  1.0,1.0,1.0]);
+    uvs = uvs.concat([0,1, 0,0, 1,0]);
+    positions = positions.concat([0.0,1.0,0.0,  1.0,1.0,1.0,  1.0,1.0,0.0]);
+    uvs = uvs.concat([0,1, 1,0, 1,1]);
 
-    allverts = allverts.concat( [1.0,0.0,0.0,  1.0,1.0,1.0,  1.0,0.0,1.0] );
-    allverts = allverts.concat( [1,0, 0,1, 0,0] );
-    allverts = allverts.concat( [1.0,0.0,0.0,  1.0,1.0,0.0,  1.0,1.0,1.0] );
-    allverts = allverts.concat( [1,0, 1,1, 0,1] );
+    // Right
+    positions = positions.concat([1.0,0.0,0.0,  1.0,1.0,1.0,  1.0,0.0,1.0]);
+    uvs = uvs.concat([1,0, 0,1, 0,0]);
+    positions = positions.concat([1.0,0.0,0.0,  1.0,1.0,0.0,  1.0,1.0,1.0]);
+    uvs = uvs.concat([1,0, 1,1, 0,1]);
+    
+    // Bottom
+    positions = positions.concat( [1.0,0.0,0.0,  0.0,0.0,1.0,  1.0,0.0,1.0]);
+    uvs = uvs.concat([1,0, 0,1, 0,0]);
+    positions = positions.concat([1.0,0.0,0.0,  0.0,0.0,0.0,  0.0,0.0,1.0]);
+    uvs = uvs.concat([1,0, 1,1, 0,1]);
 
-    allverts = allverts.concat( [1.0,0.0,0.0,  0.0,0.0,1.0,  1.0,0.0,1.0] );
-    allverts = allverts.concat( [1,0, 0,1, 0,0 ]);
-    allverts = allverts.concat( [1.0,0.0,0.0,  0.0,0.0,0.0,  0.0,0.0,1.0] );
-    allverts = allverts.concat( [1,0, 1,1, 0,1] );
+    // Back
+    positions = positions.concat([0.0,0.0,1.0,  1.0,1.0,1.0,  0.0,1.0,1.0]);
+    uvs = uvs.concat([1,0, 0,1, 1,1]);
+    positions = positions.concat([0.0,0.0,1.0,  1.0,0.0,1.0,  1.0,1.0,1.0]);
+    uvs = uvs.concat([1,0, 0,0, 0,1]);
 
-    allverts = allverts.concat( [0.0,0.0,1.0,  1.0,1.0,1.0,  0.0,1.0,1.0] );
-    allverts = allverts.concat( [1,0, 0,1, 1,1] );
-    allverts = allverts.concat( [0.0,0.0,1.0,  1.0,0.0,1.0,  1.0,1.0,1.0] );
-    allverts = allverts.concat( [1,0, 0,0, 0,1] );
+    // Left
+    positions = positions.concat([0.0,0.0,0.0,  0.0,1.0,1.0,  0.0,1.0,0.0]);
+    uvs = uvs.concat([1,0, 0,1, 1,1]);
+    positions = positions.concat([0.0,0.0,0.0,  0.0,0.0,1.0,  0.0,1.0,1.0]);
+    uvs = uvs.concat([1,0, 0,0, 0,1]);
 
-    allverts = allverts.concat( [0.0,0.0,0.0,  0.0,1.0,1.0,  0.0,1.0,0.0] );
-    allverts = allverts.concat( [1,0, 0,1, 1,1] );
-    allverts = allverts.concat( [0.0,0.0,0.0,  0.0,0.0,1.0,  0.0,1.0,1.0] );  
-    allverts = allverts.concat( [1,0, 0,0, 0,1] );
-
-    drawTriangle3DUV(allverts)
-  }
+    drawTriangle3DUV(positions, uvs);  // Pass as two separate arrays
+}
 
 } 
 
