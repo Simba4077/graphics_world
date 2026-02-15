@@ -411,7 +411,7 @@ function renderAllShapes(){
   var sky = new Cube();
   sky.color = [0.5, 0.5, 0.5, 1.0];
   sky.textureNum = 0;
-  sky.matrix.scale(50,50,50);
+  sky.matrix.scale(50,140,50);
   sky.matrix.translate(-0.5, -0.5, -0.5);
   sky.render();
 
@@ -419,7 +419,7 @@ function renderAllShapes(){
   floor.color = [0.5, 0.5, 0.5, 1.0];
   floor.textureNum = 1;
   floor.matrix.translate(0, -.75, -0.0);
-  floor.matrix.scale(20, 0.01, 20);
+  floor.matrix.scale(50, 0.01, 50);
   floor.matrix.translate(-.5, 1, -.5);
   floor.render();
 
