@@ -3,6 +3,7 @@ class Camera{
         this.eye = new Vector3([0,0,3]);
         this.at = new Vector3([0,0,-100]);
         this.up = new Vector3([0,1,0]);
+        this.groundLevel = .75; // y-coordinate of the ground plane
     }
 
     forward(){
@@ -18,6 +19,13 @@ class Camera{
         // eye += f; at += f;
         this.eye = this.eye.add(f);
         this.at = this.at.add(f);
+
+        //prevent going below ground level
+        if(this.eye.elements[1] < this.groundLevel) {
+            var correction = this.groundLevel - this.eye.elements[1];
+            this.eye.elements[1] += this.groundLevel;
+            this.at.elements[1] += correction;
+        }
     }
 
     back(){
@@ -33,6 +41,12 @@ class Camera{
         // eye += b; at += b;
         this.eye = this.eye.add(b);
         this.at = this.at.add(b);
+        //prevent going below ground level
+        if(this.eye.elements[1] < this.groundLevel) {
+            var correction = this.groundLevel - this.eye.elements[1];
+            this.eye.elements[1] += this.groundLevel;
+            this.at.elements[1] += correction;
+        }
     }
 
     left(){
@@ -50,6 +64,13 @@ class Camera{
         // eye += s; at += s;
         this.eye = this.eye.add(s);
         this.at = this.at.add(s);
+
+        //prevent going below ground level
+        if(this.eye.elements[1] < this.groundLevel) {
+            var correction = this.groundLevel - this.eye.elements[1];
+            this.eye.elements[1] += this.groundLevel;
+            this.at.elements[1] += correction;
+        }
     }
 
     right(){
@@ -67,6 +88,12 @@ class Camera{
         // eye += s; at += s;
         this.eye = this.eye.add(s);
         this.at = this.at.add(s);
+        //prevent going below ground level
+        if(this.eye.elements[1] < this.groundLevel) {
+            var correction = this.groundLevel - this.eye.elements[1];
+            this.eye.elements[1] += this.groundLevel;
+            this.at.elements[1] += correction;
+        }
     }
 
 panLeft(){

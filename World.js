@@ -365,6 +365,14 @@ function keydown(ev) {
     } else if(ev.keyCode == 70) { // F
         g_flyMode = !g_flyMode;
         console.log("Fly mode: " + (g_flyMode ? "ON" : "OFF"));
+        if (!g_flyMode) {
+          var groundLevel = 1;
+          if (g_camera.eye.elements[1] > groundLevel) {
+            var dropAmount = g_camera.eye.elements[1] - groundLevel;
+            g_camera.eye.elements[1] -= dropAmount;
+            g_camera.at.elements[1] -= dropAmount;
+          }
+        }
     }
     renderAllShapes();
 }
