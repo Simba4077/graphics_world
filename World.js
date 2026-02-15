@@ -154,6 +154,11 @@ let g_globalAngle = 0;
 let g_camera;
 let g_yellowAngle = 0;
 let g_magentaAngle = 0;
+let g_isDragging = false;
+let g_lastMouseX = 0;
+let g_lastMouseY = 0;
+let g_flyMode = false;
+
 
 
 
@@ -169,6 +174,62 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
+
+function handleMouseDown(ev) {
+  g_isDragging = true;
+  g_lastMouseX = ev.clientX;
+  g_lastMouseY = ev.clientY;
+}
+
+function handleMouseMove(ev) {
+  if(!g_isDragging) return;
+  var deltaX = ev.clientX - g_lastMouseX;
+  var deltaY = ev.clientY - g_lastMouseY;
+  g_lastMouseX = ev.clientX;
+  g_lastMouseY = ev.clientY;
+  var sensitivity = 0.2;
+  if(deltaX !== 0) {
+    var angle = -deltaX * sensitivity;
+    rotateCameraHorizontal(angle);
+  }
+  if(deltaY !== 0) {
+    var angleY = -deltaY * sensitivity;
+    rotateCameraVertical(angleY);
+  }
+  renderAllShapes();
+}
+
+function rotateCameraHorizontal(angle) {
+  var f = new Vector3();
+  f.set(g_camera.at);
+  f.sub(g_camera.eye);
+  var rotationMatrix = new Matrix4();
+  rotationMatrix.setRotate(angle, g_camera.up.elements[0], g_camera.up.elements[1], g_camera.up.elements[2]);
+  var f_prime = rotationMatrix.multiplyVector3(f);
+  g_camera.at = new Vector3();
+  g_camera.at.set(g_camera.eye);
+  g_camera.at.add(f_prime);
+}
+
+function rotateCameraVertical(angle) {
+  var f = new Vector3();
+  f.set(g_camera.at);
+  f.sub(g_camera.eye);
+  var s = Vector3.cross(g_camera.up, f);
+  var rotationMatrix = new Matrix4();
+  rotationMatrix.setRotate(angle, s.elements[0], s.elements[1], s.elements[2]);
+  var f_prime = rotationMatrix.multiplyVector3(f);
+  g_camera.at = new Vector3();
+  g_camera.at.set(g_camera.eye);
+  g_camera.at.add(f_prime);
+}
+
+function handleMouseUp(ev) {
+  g_isDragging = false;
+}
+
+
+
 function main() {
   // Retrieve <canvas> element
   setupWebGL();
@@ -180,6 +241,11 @@ function main() {
   addActionsForHtmlUI();
 
   document.onkeydown = keydown;
+
+  //mouse controls
+  canvas.onmousedown = handleMouseDown;
+  canvas.onmousemove = handleMouseMove;
+  canvas.onmouseup = handleMouseUp;
   initTextures();
  
   // Specify the color for clearing <canvas>
@@ -195,6 +261,9 @@ var g_shapesList = [];
 // var g_points = [];  // The array for the position of a mouse press
 // var g_colors = [];  // The array to store the color of a point
 // var g_sizes = [];   // The array to store the size of a point
+
+
+
 
 function click(ev) {
   //extract event click and convert coordinates to webGL coordinates
@@ -231,19 +300,44 @@ function convertCoordinatesEventToGL(ev) {
 g_camera = new Camera();
 
 var g_map = [
-  [1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,1,1,0,0,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,0,1,0,0,1],
-  [1,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1],
+  [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,1,1,0,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1],
+  [1,0,0,0,1,0,0,1,0,0,0,0,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 ];
 
 function drawMap(){
-  for(x=0; x<8;x++){
-    for(y=0;y<8;y++){
+  for(x=0; x<32;x++){
+    for(y=0;y<32;y++){
       if(g_map[x][y] == 1){
         var body = new Cube();
         body.color = [1.0, 0.0, 0.0, 1.0];
@@ -268,6 +362,9 @@ function keydown(ev) {
         g_camera.panLeft();
     } else if(ev.keyCode == 69) { // E
         g_camera.panRight();
+    } else if(ev.keyCode == 70) { // F
+        g_flyMode = !g_flyMode;
+        console.log("Fly mode: " + (g_flyMode ? "ON" : "OFF"));
     }
     renderAllShapes();
 }

@@ -10,6 +10,9 @@ class Camera{
         var f = new Vector3();
         f.set(this.at);
         f.sub(this.eye);
+        if(!g_flyMode){
+            f.elements[1] = 0; // prevent flying by zeroing out y component
+        }
         // Normalize
         f.normalize();
         // eye += f; at += f;
@@ -22,6 +25,9 @@ class Camera{
         var b = new Vector3();
         b.set(this.eye);
         b.sub(this.at);
+        if(!g_flyMode){
+            b.elements[1] = 0; // prevent flying by zeroing out y component
+        }
         // Normalize
         b.normalize();
         // eye += b; at += b;
@@ -36,6 +42,9 @@ class Camera{
         f.sub(this.eye);
         // s = up × f
         var s = Vector3.cross(this.up, f);
+        if(!g_flyMode){
+            s.elements[1] = 0; // prevent flying by zeroing out y component
+        }
         // Normalize
         s.normalize();
         // eye += s; at += s;
@@ -50,6 +59,9 @@ class Camera{
         f.sub(this.eye);
         // s = f × up (opposite of left)
         var s = Vector3.cross(f, this.up);
+        if(!g_flyMode){
+            s.elements[1] = 0; // prevent flying by zeroing out y component
+        }
         // Normalize
         s.normalize();
         // eye += s; at += s;
