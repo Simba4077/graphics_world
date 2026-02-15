@@ -4,6 +4,75 @@ class Cube{
     this.color=[1.0,1.0,1.0,1.0];
     this.matrix = new Matrix4(); //uncomment when using 
     this.textureNum = -1; //use UV color as default
+    this.cubeVerts =[
+      // Front face
+      0.0, 0.0, 0.0,
+      1.0, 1.0, 0.0,
+      1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0,
+      1.0, 1.0, 0.0,
+
+      // Top face
+      0.0, 1.0, 0.0,
+      0.0, 1.0, 1.0,
+      1.0, 1.0, 1.0,
+      0.0, 1.0, 0.0,
+      1.0, 1.0, 1.0,
+      1.0, 1.0, 0.0,
+
+      // Right face
+      1.0, 0.0, 0.0,
+      1.0, 1.0, 1.0,
+      1.0, 0.0, 1.0,
+      1.0, 0.0, 0.0,
+      1.0, 1.0, 0.0,
+      1.0, 1.0, 1.0,
+
+      // Bottom face
+      1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0,
+      1.0, 0.0, 1.0,
+      1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0,
+
+      // Back face
+      0.0, 0.0, 1.0,
+      1.0, 1.0, 1.0,
+      0.0, 1.0, 1.0,
+      0.0, 0.0, 1.0,
+      1.0, 0.0, 1.0,
+      1.0, 1.0, 1.0,
+
+      // Left face
+      0.0, 0.0, 0.0,
+      0.0, 1.0, 1.0,
+      0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0,
+      0.0, 1.0, 1.0,
+    ];
+    this.cubeUVs=[
+      // Front face
+      0,0, 1,1, 1,0,
+      0,0, 0,1, 1,1,
+      // Top face
+      0,1, 0,0, 1,0,
+      0,1, 1,0, 1,1,
+      // Right face
+      1,0, 0,1, 0,0,
+      1,0, 1,1, 0,1,
+      // Bottom face
+      1,0, 0,1, 0,0,
+      1,0, 1,1, 0,1,
+      // Back face
+      1,0, 0,1, 1,1,
+      1,0, 0,0, 0,1,
+      // Left face
+      1,0, 0,1, 1,1,
+      1,0, 0,0, 0,1,
+    ]
   }
 
   render(){
@@ -53,46 +122,7 @@ renderfast(){
     gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
     gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-    var positions = [];
-    var uvs = [];
-    
-    // Front face
-    positions = positions.concat([0.0,0.0,0.0,  1.0,1.0,0.0,  1.0,0.0,0.0]);
-    uvs = uvs.concat([0,0, 1,1, 1,0]);
-    positions = positions.concat([0.0,0.0,0.0,  0.0,1.0,0.0,  1.0,1.0,0.0]);
-    uvs = uvs.concat([0,0, 0,1, 1,1]);
-
-    // Top
-    positions = positions.concat([0.0,1.0,0.0,  0.0,1.0,1.0,  1.0,1.0,1.0]);
-    uvs = uvs.concat([0,1, 0,0, 1,0]);
-    positions = positions.concat([0.0,1.0,0.0,  1.0,1.0,1.0,  1.0,1.0,0.0]);
-    uvs = uvs.concat([0,1, 1,0, 1,1]);
-
-    // Right
-    positions = positions.concat([1.0,0.0,0.0,  1.0,1.0,1.0,  1.0,0.0,1.0]);
-    uvs = uvs.concat([1,0, 0,1, 0,0]);
-    positions = positions.concat([1.0,0.0,0.0,  1.0,1.0,0.0,  1.0,1.0,1.0]);
-    uvs = uvs.concat([1,0, 1,1, 0,1]);
-    
-    // Bottom
-    positions = positions.concat( [1.0,0.0,0.0,  0.0,0.0,1.0,  1.0,0.0,1.0]);
-    uvs = uvs.concat([1,0, 0,1, 0,0]);
-    positions = positions.concat([1.0,0.0,0.0,  0.0,0.0,0.0,  0.0,0.0,1.0]);
-    uvs = uvs.concat([1,0, 1,1, 0,1]);
-
-    // Back
-    positions = positions.concat([0.0,0.0,1.0,  1.0,1.0,1.0,  0.0,1.0,1.0]);
-    uvs = uvs.concat([1,0, 0,1, 1,1]);
-    positions = positions.concat([0.0,0.0,1.0,  1.0,0.0,1.0,  1.0,1.0,1.0]);
-    uvs = uvs.concat([1,0, 0,0, 0,1]);
-
-    // Left
-    positions = positions.concat([0.0,0.0,0.0,  0.0,1.0,1.0,  0.0,1.0,0.0]);
-    uvs = uvs.concat([1,0, 0,1, 1,1]);
-    positions = positions.concat([0.0,0.0,0.0,  0.0,0.0,1.0,  0.0,1.0,1.0]);
-    uvs = uvs.concat([1,0, 0,0, 0,1]);
-
-    drawTriangle3DUV(positions, uvs);  // Pass as two separate arrays
+    drawTriangle3DUV( this.cubeVerts, this.cubeUVs );
 }
 
 } 
