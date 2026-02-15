@@ -41,8 +41,8 @@ class Camera{
         }
         // Normalize
         b.normalize();
-     var newEye = this.eye.add(f);
-        var newAt = this.at.add(f);
+     var newEye = this.eye.add(b);
+        var newAt = this.at.add(b);
         
         // Check if new position would be below ground
         if (newEye.elements[1] >= this.groundLevel) {
@@ -68,8 +68,8 @@ class Camera{
         }
         // Normalize
         s.normalize();
-     var newEye = this.eye.add(f);
-        var newAt = this.at.add(f);
+     var newEye = this.eye.add(s);
+        var newAt = this.at.add(s);
         
         // Check if new position would be below ground
         if (newEye.elements[1] >= this.groundLevel) {
@@ -95,8 +95,8 @@ class Camera{
         }
         // Normalize
         s.normalize();
-     var newEye = this.eye.add(f);
-        var newAt = this.at.add(f);
+     var newEye = this.eye.add(s);
+        var newAt = this.at.add(s);
         
         // Check if new position would be below ground
         if (newEye.elements[1] >= this.groundLevel) {
