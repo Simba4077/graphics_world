@@ -343,6 +343,7 @@ function drawMap(){
         for(var h=0; h<height; h++){
           var body = new Cube();
           body.color = [1.0, 0.0, 0.0, 1.0];
+          body.textureNum = 0;
           // Stack cubes: each cube is 1 unit tall, starting from -0.75
           body.matrix.translate(x-16, -0.75 + h, z-16);
           body.renderfast();
