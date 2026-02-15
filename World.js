@@ -334,13 +334,19 @@ var g_map = [
 ];
 
 function drawMap(){
-  for(var z=0; z<g_map.length; z++){        // Use actual row count
-    for(var x=0; x<g_map[0].length; x++){   // Use actual column count
-      if(g_map[z][x] == 1){
-        var body = new Cube();
-        body.color = [1.0, 0.0, 0.0, 1.0];
-        body.matrix.translate(x-16, -0.75, z-16);
-        body.render();
+  for(var z=0; z<g_map.length; z++){
+    for(var x=0; x<g_map[0].length; x++){
+      var height = g_map[z][x];
+      
+      if(height > 0){
+        // Draw 'height' number of cubes stacked vertically
+        for(var h=0; h<height; h++){
+          var body = new Cube();
+          body.color = [1.0, 0.0, 0.0, 1.0];
+          // Stack cubes: each cube is 1 unit tall, starting from -0.75
+          body.matrix.translate(x-16, -0.75 + h, z-16);
+          body.render();
+        }
       }  
     }
   }
