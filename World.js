@@ -18,12 +18,14 @@ var VSHADER_SOURCE = `
 // Fragment shader program
 //usample0=sky
 //usample1=ground
+//usample2=wall
 var FSHADER_SOURCE = `
   precision mediump float;
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
   uniform sampler2D u_Sampler1;
+  uniform sampler2D u_Sampler2;
   uniform int u_whichTexture;
   void main() {
 
@@ -38,7 +40,9 @@ var FSHADER_SOURCE = `
 
   } else if(u_whichTexture == 1) {
     gl_FragColor = texture2D(u_Sampler1, v_UV); //Use texture1
-  } 
+  } else if(u_whichTexture == 2) {
+    gl_FragColor = texture2D(u_Sampler2, v_UV); //Use texture2
+  }
     else {
     gl_FragColor = vec4(1.0, 0.2, 0.2, 1.0); //Error color
   }
@@ -60,6 +64,7 @@ let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
 let u_Sampler1;
+let u_Sampler2;
 
 function setupWebGL() {
   canvas = document.getElementById('webgl'); //do not use var, that makes a new local variable instead of using the current global one 
@@ -138,6 +143,12 @@ function connectVariablesToGLSL() {
   u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
   if (!u_Sampler1) {
     console.log('Failed to get the storage location of u_Sampler1');
+    return false;
+  }
+
+  u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+  if (!u_Sampler2) {
+    console.log('Failed to get the storage location of u_Sampler2');
     return false;
   }
 
@@ -345,7 +356,7 @@ function drawMap(){
         // Draw 'height' number of cubes stacked vertically
         for(var h=0; h<height; h++){
           body.color = [1.0, 0.0, 0.0, 1.0];
-          body.textureNum = -1;
+          body.textureNum = 2;
           // Stack cubes: each cube is 1 unit tall, starting from -0.75
           body.matrix.setIdentity();
           body.matrix.translate(x-16, -0.75 + h, z-16);
@@ -430,16 +441,16 @@ function renderAllShapes(){
   floor.color = [0.5, 0.5, 0.5, 1.0];
   floor.textureNum = 1;
   floor.matrix.translate(0, -.75, -0.0);
-  floor.matrix.scale(50, 0.01, 50);
+  floor.matrix.scale(80, 0.01, 80);
   floor.matrix.translate(-.5, 1, -.5);
   floor.render();
 
-  var sphere1 = new Sphere();
-  sphere1.color = [0.0, 1.0, 0.0, 1.0];
-  sphere1.textureNum = 0;
-  sphere1.matrix.scale(50, 50, 50);
-  sphere1.matrix.translate(0, .3, 0);
-  sphere1.renderfast();
+  var sky = new Sphere();
+  sky.color = [0.0, 1.0, 0.0, 1.0];
+  sky.textureNum = 0;
+  sky.matrix.scale(50, 50, 50);
+  sky.matrix.translate(0, .3, 0);
+  sky.renderfast();
 
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
@@ -513,7 +524,17 @@ function initTextures() {
   image1.onload = function(){ sendImageToTEXTURE1(image1); };
   image1.onerror = function() { console.log('Failed to load uvgrid.png'); };  // Add this
 
-  image1.src = 'uvgrid.png';
+  image1.src = 'uvgrid.jpg';
+
+  var image2 = new Image();
+  if (!image2) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  image2.onload = function(){ sendImageToTEXTURE2(image2); };
+  image2.onerror = function() { console.log('Failed to load wall.jpg'); };  // Add this
+  image2.src = 'wall.jpg';
+
 
   return true;
 }
@@ -572,4 +593,22 @@ function sendImageToTEXTURE1(image) {
   console.log("texture 1 loaded with mapmaps");
   console.log("GL error:", gl.getError()); // Should be 0
 
+}
+
+function sendImageToTEXTURE2(image) {
+  var texture = gl.createTexture();
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.generateMipmap(gl.TEXTURE_2D); // Generate mipmap for the texture
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+  gl.uniform1i(u_Sampler2, 2);
+  console.log("texture 2 loaded with mapmaps");
+  console.log("GL error:", gl.getError()); // Should be 0
 }
