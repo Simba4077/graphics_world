@@ -16,6 +16,8 @@ var VSHADER_SOURCE = `
 `;
 
 // Fragment shader program
+//usample0=sky
+//usample1=ground
 var FSHADER_SOURCE = `
   precision mediump float;
   varying vec2 v_UV;
@@ -393,7 +395,7 @@ function renderAllShapes(){
 
   var projMat = new Matrix4();
   //fov is 40, aspect ratio is width/height of canvas, near plane is 0.1, far plane is 100
-  projMat.setPerspective(50, canvas.width/canvas.height, 1, 100);
+  projMat.setPerspective(50, canvas.width/canvas.height, 1, 1000);
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   var viewMat = new Matrix4();
@@ -417,12 +419,12 @@ function renderAllShapes(){
 
   drawMap();
 
-  var sky = new Cube();
-  sky.color = [0.5, 0.5, 0.5, 1.0];
-  sky.textureNum = 0;
-  sky.matrix.scale(50,140,50);
-  sky.matrix.translate(-0.5, -0.5, -0.5);
-  sky.render();
+  // var sky = new Cube();
+  // sky.color = [0.5, 0.5, 0.5, 1.0];
+  // sky.textureNum = 0;
+  // sky.matrix.scale(50,50,50);
+  // sky.matrix.translate(-0.5, -0.5, -0.5);
+  // sky.render();
 
   var floor = new Cube();
   floor.color = [0.5, 0.5, 0.5, 1.0];
@@ -434,8 +436,9 @@ function renderAllShapes(){
 
   var sphere1 = new Sphere();
   sphere1.color = [0.0, 1.0, 0.0, 1.0];
-  sphere1.textureNum = -1;
-  sphere1.matrix.translate(2, -0.5, 2);
+  sphere1.textureNum = 0;
+  sphere1.matrix.scale(50, 50, 50);
+  sphere1.matrix.translate(0, .3, 0);
   sphere1.renderfast();
 
   var body = new Cube();
@@ -533,7 +536,8 @@ function sendImageToTEXTURE0(image) {
   
   gl.generateMipmap(gl.TEXTURE_2D); // Generate mipmap for the texture
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);  // Add this line
+  
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler0, 0);
 
