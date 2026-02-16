@@ -141,8 +141,6 @@ renderfast(){
 }
 
 
-
-  // ADD THIS NEW METHOD:
   renderfastWithUV(uvScaleX, uvScaleY, uvOffsetX, uvOffsetY){
     var rgba = this.color;
     gl.uniform1i(u_whichTexture, this.textureNum);
