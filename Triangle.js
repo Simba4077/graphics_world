@@ -42,31 +42,6 @@ class Triangle{
   }
 }
 
-var g_vertexBuffer =null;
-function initTraingle3D(){
-  // Create a buffer object
-  g_vertexBuffer = gl.createBuffer();
-  if (!g_vertexBuffer) {
-    console.log('Failed to create the buffer object');
-    return -1;
-  }
-
-  // Bind the buffer object to target
-  gl.bindBuffer(gl.ARRAY_BUFFER, g_vertexBuffer);
-
-  
-  // var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-  // if (a_Position < 0) {
-  //   console.log('Failed to get the storage location of a_Position');
-  //   return -1;
-  // }
-  // Assign the buffer object to a_Position variable
-  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
-
-  // Enable the assignment to a_Position variable
-  gl.enableVertexAttribArray(a_Position);
-
-}
 
 function drawTriangle(vertices) {
   // var vertices = new Float32Array([
@@ -103,7 +78,27 @@ function drawTriangle(vertices) {
   return n;
 }
 
+
+
+var g_vertexBuffer =null;
 var g_uvBuffer = null;
+
+function initTriangle3D(){
+  // Create a buffer object
+  g_vertexBuffer = gl.createBuffer();
+  if (!g_vertexBuffer) {
+    console.log('Failed to create the buffer object');
+    return -1;
+  }
+  // Bind the buffer object to target
+  gl.bindBuffer(gl.ARRAY_BUFFER, g_vertexBuffer);
+  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+
+  // Enable the assignment to a_Position variable
+  gl.enableVertexAttribArray(a_Position);
+
+}
+
 function initUVBuffer(){
   //making a uv buffer
   g_uvBuffer = gl.createBuffer();
@@ -127,7 +122,7 @@ function drawTriangle3D(vertices) {
   var n = vertices.length/3; // The number of vertices
 
   if(g_vertexBuffer == null){
-    initTraingle3D();
+    initTriangle3D();
   }
 
   // Write date into the buffer object
@@ -140,7 +135,7 @@ function drawTriangle3DUV(vertices, uv) {
   var n = vertices.length / 3; // The number of vertices
 
   if(g_vertexBuffer == null){
-    initTraingle3D();
+    initTriangle3D();
   }
     // Write data into the buffer object
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);

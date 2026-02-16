@@ -337,6 +337,7 @@ function drawMap(){
   var body = new Cube();
   for(var z=0; z<g_map.length; z++){
     for(var x=0; x<g_map[0].length; x++){
+      for(y=0;y<32;y++){
       var height = g_map[z][x];
       
       if(height > 0){
@@ -348,6 +349,7 @@ function drawMap(){
           body.matrix.setIdentity();
           body.matrix.translate(x-16, -0.75 + h, z-16);
           body.renderfast();
+        }
         }
       }  
     }

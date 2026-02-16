@@ -4,7 +4,7 @@ class Cube{
     this.color=[1.0,1.0,1.0,1.0];
     this.matrix = new Matrix4(); //uncomment when using 
     this.textureNum = -1; //use UV color as default
-    this.cubeVerts =[
+    this.cubeVerts = new Float32Array([
       // Front face
       0.0, 0.0, 0.0,
       1.0, 1.0, 0.0,
@@ -52,8 +52,8 @@ class Cube{
       0.0, 0.0, 0.0,
       0.0, 0.0, 1.0,
       0.0, 1.0, 1.0,
-    ];
-    this.cubeUVs=[
+    ]);
+    this.cubeUVs=new Float32Array([
       // Front face
       0,0, 1,1, 1,0,
       0,0, 0,1, 1,1,
@@ -72,7 +72,7 @@ class Cube{
       // Left face
       1,0, 0,1, 1,1,
       1,0, 0,0, 0,1,
-    ]
+    ]);
   }
 
   render(){
@@ -121,8 +121,23 @@ renderfast(){
     gl.uniform1i(u_whichTexture, this.textureNum);
     gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
     gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+    
+    if(g_vertexBuffer == null){
+      initTriangle3D();
+    }
+    if(g_uvBuffer == null){
+      initUVBuffer();
+    }
 
-    drawTriangle3DUV( this.cubeVerts, this.cubeUVs );
+    // Bind vertex buffer and upload vertex data
+    gl.bindBuffer(gl.ARRAY_BUFFER, g_vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.cubeVerts, gl.DYNAMIC_DRAW);
+    
+    // Bind UV buffer and upload UV data
+    gl.bindBuffer(gl.ARRAY_BUFFER, g_uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.cubeUVs, gl.DYNAMIC_DRAW);
+    
+    gl.drawArrays(gl.TRIANGLES, 0, 36);
 }
 
 } 
