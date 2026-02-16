@@ -432,6 +432,12 @@ function renderAllShapes(){
   floor.matrix.translate(-.5, 1, -.5);
   floor.render();
 
+  var sphere1 = new Sphere();
+  sphere1.color = [0.0, 1.0, 0.0, 1.0];
+  sphere1.textureNum = -1;
+  sphere1.matrix.translate(2, -0.5, 2);
+  sphere1.renderfast();
+
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
   body.textureNum = 0;
