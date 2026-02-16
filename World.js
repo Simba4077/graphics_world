@@ -177,7 +177,9 @@ let g_enemy = {
     z: -8,
     speed: 0.06,
     chaseRadius: 1000000000,  // How far away it can detect you
-    caught: false
+    caught: false,
+    path: null,
+    pathUpdateTimer: 0
 };
 
 let g_gameStartTime = null;
@@ -187,6 +189,105 @@ let g_goalPosition = {x: 25, z: 25};  // End goal position
 
 var minimapCanvas;
 var minimapCtx;
+
+// A* pathfinding
+function findPath(startX, startZ, endX, endZ) {
+    // Convert world to map coordinates
+    var startMapX = Math.floor(startX + 16);
+    var startMapZ = Math.floor(startZ + 16);
+    var endMapX = Math.floor(endX + 16);
+    var endMapZ = Math.floor(endZ + 16);
+    
+    // Check if start/end are valid
+    if(startMapX < 0 || startMapX >= g_map[0].length || startMapZ < 0 || startMapZ >= g_map.length) return null;
+    if(endMapX < 0 || endMapX >= g_map[0].length || endMapZ < 0 || endMapZ >= g_map.length) return null;
+    
+    var openSet = [{x: startMapX, z: startMapZ, g: 0, h: 0, f: 0, parent: null}];
+    var closedSet = [];
+    
+    while(openSet.length > 0) {
+        // Find node with lowest f score
+        var currentIndex = 0;
+        for(var i = 1; i < openSet.length; i++) {
+            if(openSet[i].f < openSet[currentIndex].f) {
+                currentIndex = i;
+            }
+        }
+        
+        var current = openSet[currentIndex];
+        
+        // Reached goal
+        if(current.x === endMapX && current.z === endMapZ) {
+            var path = [];
+            var temp = current;
+            while(temp) {
+                path.push({x: temp.x - 16, z: temp.z - 16}); // Convert back to world coords
+                temp = temp.parent;
+            }
+            return path.reverse();
+        }
+        
+        // Move current from open to closed
+        openSet.splice(currentIndex, 1);
+        closedSet.push(current);
+        
+        // Check neighbors (4 directions)
+        var neighbors = [
+            {x: current.x + 1, z: current.z},
+            {x: current.x - 1, z: current.z},
+            {x: current.x, z: current.z + 1},
+            {x: current.x, z: current.z - 1}
+        ];
+        
+        for(var i = 0; i < neighbors.length; i++) {
+            var neighbor = neighbors[i];
+            
+            // Check bounds
+            if(neighbor.x < 0 || neighbor.x >= g_map[0].length || neighbor.z < 0 || neighbor.z >= g_map.length) continue;
+            
+            // Check if walkable
+            if(g_map[neighbor.z][neighbor.x] > 0) continue;
+            
+            // Check if in closed set
+            var inClosed = false;
+            for(var j = 0; j < closedSet.length; j++) {
+                if(closedSet[j].x === neighbor.x && closedSet[j].z === neighbor.z) {
+                    inClosed = true;
+                    break;
+                }
+            }
+            if(inClosed) continue;
+            
+            // Calculate scores
+            var g = current.g + 1;
+            var h = Math.abs(neighbor.x - endMapX) + Math.abs(neighbor.z - endMapZ);
+            var f = g + h;
+            
+            // Check if in open set with better score
+            var inOpen = false;
+            for(var j = 0; j < openSet.length; j++) {
+                if(openSet[j].x === neighbor.x && openSet[j].z === neighbor.z) {
+                    inOpen = true;
+                    if(g < openSet[j].g) {
+                        openSet[j].g = g;
+                        openSet[j].f = f;
+                        openSet[j].parent = current;
+                    }
+                    break;
+                }
+            }
+            
+            if(!inOpen) {
+                openSet.push({x: neighbor.x, z: neighbor.z, g: g, h: h, f: f, parent: current});
+            }
+        }
+        
+        // Prevent infinite loops
+        if(closedSet.length > 1000) break;
+    }
+    
+    return null; // No path found
+}
 
 function setupMinimap() {
     minimapCanvas = document.getElementById('minimap');
@@ -263,38 +364,57 @@ function drawMinimap() {
     minimapCtx.stroke();
 }
 
+
+
 function updateEnemy() {
     if(g_gameWon || g_enemy.caught) return;
     
-    // Calculate direction to player
-    var dirX = g_camera.eye.elements[0] - g_enemy.x;
-    var dirZ = g_camera.eye.elements[2] - g_enemy.z;
-    var distance = Math.sqrt(dirX * dirX + dirZ * dirZ);
+    var distToPlayer = Math.sqrt(
+        Math.pow(g_camera.eye.elements[0] - g_enemy.x, 2) +
+        Math.pow(g_camera.eye.elements[2] - g_enemy.z, 2)
+    );
     
-    // Only chase if player is within chase radius
-    if(distance > g_enemy.chaseRadius) return;
+    // Only chase if within radius
+    if(distToPlayer > g_enemy.chaseRadius) {
+        g_enemy.path = null;
+        return;
+    }
     
-    // Normalize direction
-    dirX /= distance;
-    dirZ /= distance;
+    // Update path every 30 frames (about 0.5 seconds)
+    g_enemy.pathUpdateTimer++;
+    if(g_enemy.pathUpdateTimer > 30 || !g_enemy.path) {
+        g_enemy.pathUpdateTimer = 0;
+        g_enemy.path = findPath(
+            g_enemy.x, 
+            g_enemy.z, 
+            g_camera.eye.elements[0], 
+            g_camera.eye.elements[2]
+        );
+    }
     
-    // Try to move toward player
-    var newX = g_enemy.x + dirX * g_enemy.speed;
-    var newZ = g_enemy.z + dirZ * g_enemy.speed;
-    
-    // Check collision with walls
-    var mapX = Math.floor(newX + 16);
-    var mapZ = Math.floor(newZ + 16);
-    
-    if(mapX >= 0 && mapX < g_map[0].length && mapZ >= 0 && mapZ < g_map.length) {
-        if(g_map[mapZ][mapX] == 0) {  // No wall, can move
-            g_enemy.x = newX;
-            g_enemy.z = newZ;
+    // Follow path
+    if(g_enemy.path && g_enemy.path.length > 1) {
+        var nextWaypoint = g_enemy.path[1]; // [0] is current position, [1] is next
+        
+        var dirX = nextWaypoint.x - g_enemy.x;
+        var dirZ = nextWaypoint.z - g_enemy.z;
+        var dist = Math.sqrt(dirX * dirX + dirZ * dirZ);
+        
+        if(dist > 0.1) {
+            // Move toward waypoint
+            dirX /= dist;
+            dirZ /= dist;
+            
+            g_enemy.x += dirX * g_enemy.speed;
+            g_enemy.z += dirZ * g_enemy.speed;
+        } else {
+            // Reached waypoint, remove it from path
+            g_enemy.path.shift();
         }
     }
     
-    // Check if caught player (within 1 unit)
-    if(distance < 1.5) {
+    // Check if caught player
+    if(distToPlayer < 1.5) {
         g_enemy.caught = true;
         console.log("CAUGHT! Game Over!");
         alert("You were caught! Time survived: " + Math.floor((performance.now() - g_gameStartTime) / 1000) + " seconds");
@@ -618,6 +738,8 @@ function restartGame() {
     g_enemy.x = -10;
     g_enemy.z = -10;
     g_enemy.caught = false;
+    g_enemy.path = null;
+    g_enemy.pathUpdateTimer = 0;
     g_gameWon = false;
     g_gameStartTime = performance.now();
     console.log("Game restarted!");
