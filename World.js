@@ -918,7 +918,7 @@ function initTextures() {
   // Register the event handler to be called on loading an image
   image.onload = function(){ sendImageToTEXTURE0(image); };
   // Tell the browser to load an image
-  image.src = 'sky.jpg';
+  image.src = 'textures/sky.jpg';
 
   //add more textures here
   var image1 = new Image();
@@ -929,7 +929,7 @@ function initTextures() {
   image1.onload = function(){ sendImageToTEXTURE1(image1); };
   image1.onerror = function() { console.log('Failed to load uvgrid.png'); };  // Add this
 
-  image1.src = 'uvgrid.jpg';
+  image1.src = 'textures/uvgrid.jpg';
 
   var image2 = new Image();
   if (!image2) {
@@ -938,7 +938,7 @@ function initTextures() {
   }
   image2.onload = function(){ sendImageToTEXTURE2(image2); };
   image2.onerror = function() { console.log('Failed to load wall.jpg'); };  // Add this
-  image2.src = 'wall.jpg';
+  image2.src = 'textures/wall.jpg';
 
 
   return true;
