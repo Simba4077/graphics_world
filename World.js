@@ -170,6 +170,7 @@ let g_isDragging = false;
 let g_lastMouseX = 0;
 let g_lastMouseY = 0;
 let g_flyMode = false;
+let_g_targetBlock = null;
 
 
 
@@ -186,6 +187,52 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
+function updateTargetBlock() {
+    var rayOrigin = g_camera.eye;
+    var rayDir = new Vector3();
+    rayDir.set(g_camera.at);
+    rayDir.sub(g_camera.eye);
+    rayDir.normalize();
+    
+    var maxDistance = 5;      // TUNE THIS: reach distance
+    var step = 0.01;           // TUNE THIS: precision
+    var startDist = 0.2;       // TUNE THIS: starting distance
+    
+    for(var dist = startDist; dist < maxDistance; dist += step) {
+        var checkX = rayOrigin.elements[0] + rayDir.elements[0] * dist;
+        var checkY = rayOrigin.elements[1] + rayDir.elements[1] * dist;
+        var checkZ = rayOrigin.elements[2] + rayDir.elements[2] * dist;
+        
+        var mapX = Math.floor(checkX + 16);   // TUNE THIS: should match drawMap offset
+        var mapZ = Math.floor(checkZ + 16);
+        
+        if(mapX < 0 || mapX >= g_map[0].length || mapZ < 0 || mapZ >= g_map.length) continue;
+        
+        var columnHeight = g_map[mapZ][mapX];
+        
+        if(columnHeight > 0) {
+            var layerHeight = Math.floor(checkY + 0.75);  // TUNE THIS: Y alignment
+            
+            // DEBUG: Uncomment to see what's being checked
+            // console.log("Checking", mapX, mapZ, "layer", layerHeight, "of", columnHeight);
+            
+            if(layerHeight >= 0 && layerHeight < columnHeight) {
+                g_targetBlock = {
+                    mapX: mapX,
+                    mapZ: mapZ,
+                    worldX: mapX - 16,
+                    worldZ: mapZ - 16,
+                    height: columnHeight,
+                    targetLayer: layerHeight,
+                    distance: dist  // Add distance for debugging
+                };
+                return;
+            }
+        }
+    }
+    
+    g_targetBlock = null;
+}
 
 
 function handleMouseDown(ev) {
@@ -418,7 +465,14 @@ function keydown(ev) {
     }
     renderAllShapes();
 }
+
+
 function breakBlock() {
+    if(!g_targetBlock) {
+        console.log("No block targeted to break!");
+        return;
+    }
+    
     // Calculate direction vector from eye to at
     var dirX = g_camera.at.elements[0] - g_camera.eye.elements[0];
     var dirZ = g_camera.at.elements[2] - g_camera.eye.elements[2];
@@ -505,7 +559,7 @@ function renderAllShapes(){
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
+  updateTargetBlock();
   drawMap();
 
   // var sky = new Cube();
@@ -515,6 +569,20 @@ function renderAllShapes(){
   // sky.matrix.translate(-0.5, -0.5, -0.5);
   // sky.render();
 
+
+// Then in renderAllShapes(), show just the targeted layer:
+if(g_targetBlock) {
+    gl.disable(gl.DEPTH_TEST);
+    
+    var marker = new Cube();
+    marker.color = [1.0, 1.0, 0.0, 1.0];
+    marker.textureNum = -2;
+    marker.matrix.translate(g_targetBlock.worldX, -0.75 + g_targetBlock.targetLayer, g_targetBlock.worldZ);
+    marker.matrix.scale(1.05, 1.05, 1.05);
+    marker.render();
+    
+    gl.enable(gl.DEPTH_TEST);
+}
   var floor = new Cube();
   floor.color = [0.5, 0.5, 0.5, 1.0];
   floor.textureNum = 1;
