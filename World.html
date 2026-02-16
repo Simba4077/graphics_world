@@ -1,65 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Change a point color</title>
-  </head>
+<head>
+<meta charset="utf-8" />
+<title>WebGL World</title>
 
-  <body onload="main()">
-    <div style="display:flex;align-items:flex-start; gap:16px"> 
+<style>
+  body {
+    margin: 0;
+    padding:20px;
+    overflow: auto;
+    font-family: sans-serif;
+  }
 
-        <canvas id="webgl" width="900" height="900">
-        Please use a browser that supports "canvas"
-        </canvas>
-        <canvas id="minimap" width="150" height="150" style="position: absolute; top: 10px; right: 20px; border: 3px solid white; background: rgba(0,0,0,0.7);"></canvas>
+  #gameContainer {
+    position: relative;
+    background: black;
+  }
 
-    </div>
-    <p id="numdot"> XXX </p>
+  /* Default windowed mode */
+  .windowed {
+    width: 400px;
+    height: 400px;
+  }
+
+  /* Fullscreen mode */
+  .fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* WebGL fills container */
+  #webgl {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Minimap size in windowed mode */
+  .windowed #minimap {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Minimap size in fullscreen mode */
+  .fullscreen #minimap {
+    width: 200px;
+    height: 200px;
+  }
+</style>
+</head>
+
+<body onload="main()">
+
+<div id="gameContainer" class="windowed">
+
+  <canvas id="webgl"></canvas>
+
+  <canvas id="minimap"
+      style="
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          border: 3px solid white;
+          background: rgba(0,0,0,0.7);
+          z-index: 10;">
+  </canvas>
+
+</div>
 
 
-    <p>
-    <button type="button" id="green">Green</button>
-    <button type="button" id="red">Red</button>
-    <button type="button" id="clearButton">Clear</button>
-    </p>
+<p id="numdot">XXX</p>
 
-    <p>
-    <button type="button" id="pointButton">Point</button>
-    <button type="button" id="triButton">Triangle</button>
-    <button type="button" id="circleButton">Circle</button>
-    </p>
+<p>
+  <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+</p>
 
-    <p>
-     <button type="button" id="draw">Draw</button> 
-     <button type="button" id="replayButton">Replay</button>
-     <button type="button" id="undoButton">Undo</button>
-    </p>
+<p>
+Camera Angle <input type="range" min="0" max="360" value="0" id="angleSlide">
+</p>
 
-    <p>
-    Camera Angle <input type="range" min="0" max="360" value="0" class="slider" id="angleSlide">
-    </p>
 
-    <p>
-     Yellow <input type="range" min="-45" max="45" value="0" id="yellowSlide">   
-    </p>
+<!-- WebGL libraries -->
+<script src="lib/webgl-utils.js"></script>
+<script src="lib/webgl-debug.js"></script>
+<script src="lib/cuon-utils.js"></script>
+<script src="lib/cuon-matrix-cse160.js"></script>
+<script src="Circle.js"></script>
+<script src="Triangle.js"></script>
+<script src="Point.js"></script>
+<script src="Cube.js"></script>
+<script src="Sphere.js"></script>
+<script src="Camera.js"></script>
+<script src="World.js"></script>
 
-    <p>
-     Magenta <input type="range" min="-45" max="45" value="0" id="magentaSlide">   
-    </p>
-  
-  
-    
-    <script src="lib/webgl-utils.js"></script>
-    <script src="lib/webgl-debug.js"></script>
-    <script src="lib/cuon-utils.js"></script>
-    <script src="lib/cuon-matrix-cse160.js"></script>
-    <script src="Circle.js"></script>
-    <script src="Triangle.js"></script>
-    <script src="Point.js"></script>
-    <script src="Cube.js"></script>
-    <script src="Sphere.js"></script>
+<script>
+let isFullscreen = false;
 
-    <script src="Camera.js"></script>
-    <script src="World.js"></script>
-  </body>
+function toggleFullscreen() {
+    const container = document.getElementById("gameContainer");
+
+    isFullscreen = !isFullscreen;
+
+    if (isFullscreen) {
+        container.classList.remove("windowed");
+        container.classList.add("fullscreen");
+    } else {
+        container.classList.remove("fullscreen");
+        container.classList.add("windowed");
+    }
+
+    resizeCanvas();
+}
+
+function resizeCanvas() {
+    const canvas = document.getElementById("webgl");
+    const container = document.getElementById("gameContainer");
+
+    // Resize main canvas resolution
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+
+    if (window.gl) {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+
+    // Resize minimap resolution
+    const minimap = document.getElementById("minimap");
+    minimap.width = minimap.clientWidth;
+    minimap.height = minimap.clientHeight;
+}
+
+window.addEventListener("resize", resizeCanvas);
+</script>
+
+</body>
 </html>

@@ -164,8 +164,7 @@ let g_selectedSize = 5;
 let g_selectedType = POINT;
 let g_globalAngle = 0;
 let g_camera;
-let g_yellowAngle = 0;
-let g_magentaAngle = 0;
+
 let g_isDragging = false;
 let g_lastMouseX = 0;
 let g_lastMouseY = 0;
@@ -442,8 +441,6 @@ function checkGoal() {
 function addActionsForHtmlUI(){
   //angle slider events
   document.getElementById('angleSlide').addEventListener('mousemove', function() {g_globalAngle=this.value; renderAllShapes();});
-  document.getElementById('magentaSlide').addEventListener('mousemove', function() { g_magentaAngle = this.value; renderAllShapes();});
-  document.getElementById('yellowSlide').addEventListener('mousemove', function() { g_yellowAngle = this.value; renderAllShapes();});
 }
 
 function tick() {
@@ -557,6 +554,9 @@ function handleMouseUp(ev) {
 function main() {
   // Retrieve <canvas> element
   setupWebGL();
+  window.gl = gl;
+  resizeCanvas();
+
   
   // Initialize shaders
   connectVariablesToGLSL();
