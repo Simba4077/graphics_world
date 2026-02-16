@@ -438,11 +438,6 @@ function checkGoal() {
 
 
 
-function addActionsForHtmlUI(){
-  //angle slider events
-  document.getElementById('angleSlide').addEventListener('mousemove', function() {g_globalAngle=this.value; renderAllShapes();});
-}
-
 function tick() {
   renderAllShapes();
   requestAnimationFrame(tick);
@@ -561,8 +556,6 @@ function main() {
   // Initialize shaders
   connectVariablesToGLSL();
 
-  //set up actions for HTML UI elements
-  addActionsForHtmlUI();
 
   document.onkeydown = keydown;
 
@@ -714,6 +707,7 @@ function keydown(ev) {
     } else if(ev.keyCode == 70) { // F
         g_flyMode = !g_flyMode;
         console.log("Fly mode: " + (g_flyMode ? "ON" : "OFF"));
+        updateFlyUI();
         if (!g_flyMode) {
           var groundLevel = 0.75;
           if (g_camera.eye.elements[1] > groundLevel) {

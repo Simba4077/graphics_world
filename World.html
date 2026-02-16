@@ -2,97 +2,206 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>WebGL World</title>
+<title>Maze Escape</title>
 
 <style>
-  body {
+  * {
     margin: 0;
-    padding:20px;
-    overflow: auto;
-    font-family: sans-serif;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  #mainLayout {
+    display: flex;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: flex-start;
   }
 
   #gameContainer {
     position: relative;
-    background: black;
+    background: #000;
+    border: 2px solid #00aaff;
+    flex-shrink: 0;
   }
 
-  /* Default windowed mode */
   .windowed {
-    width: 400px;
-    height: 400px;
+    width: 800px;
+    height: 600px;
   }
 
-  /* Fullscreen mode */
   .fullscreen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
+    border: none;
+    margin: 0;
+    z-index: 1000;
   }
 
-  /* WebGL fills container */
   #webgl {
     width: 100%;
     height: 100%;
     display: block;
   }
 
-  /* Minimap size in windowed mode */
-  .windowed #minimap {
-    width: 80px;
-    height: 80px;
+  #minimap {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 2px solid #00aaff;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10;
   }
 
-  /* Minimap size in fullscreen mode */
+  .windowed #minimap {
+    width: 120px;
+    height: 120px;
+  }
+
   .fullscreen #minimap {
     width: 200px;
     height: 200px;
+  }
+
+  #sidebar {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .section {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  button {
+    background: #00aaff;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+
+  button:hover {
+    background: #0088cc;
+  }
+
+  /* Bigger Performance Counter */
+  #numdot {
+    display: block;
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  #flyStatus {
+    display: inline-block;
+    padding: 6px 12px;
+    font-weight: 700;
+    margin-top: 10px;
+    border: 2px solid;
+  }
+
+  .fly-on {
+    color: #0f0;
+    border-color: #0f0;
+    background: rgba(0, 255, 0, 0.1);
+  }
+
+  .fly-off {
+    color: #f00;
+    border-color: #f00;
+    background: rgba(255, 0, 0, 0.1);
+  }
+
+  #angleSlide {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  p {
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+
+  .key {
+    display: inline-block;
+    background: #333;
+    padding: 2px 8px;
+    border: 1px solid #555;
+    margin: 0 2px;
+    font-weight: 700;
   }
 </style>
 </head>
 
 <body onload="main()">
 
-<div id="gameContainer" class="windowed">
+<div id="mainLayout">
+  <div id="gameContainer" class="windowed">
+    <canvas id="webgl"></canvas>
+    <canvas id="minimap"></canvas>
+  </div>
 
-  <canvas id="webgl"></canvas>
+  <div id="sidebar">
+    <div class="section">
+      <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+      <div id="numdot">FPS: 0 | MS: 0 | Time: 0s</div>
+      <div id="flyStatus" class="fly-off">Fly Mode: OFF</div>
 
-  <canvas id="minimap"
-      style="
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          border: 3px solid white;
-          background: rgba(0,0,0,0.7);
-          z-index: 10;">
-  </canvas>
+    </div>
 
+    <div class="section">
+      <h3>OBJECTIVE</h3>
+      <p>Reach the green sphere and avoid the red enemy.</p>
+    </div>
+
+    <div class="section">
+      <h3>CONTROLS</h3>
+      <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> Move</p>
+      <p><span class="key">Mouse Drag</span> Look around</p>
+      <p><span class="key">Q</span> Pan left | <span class="key">E</span> Pan right</p>
+      <p><span class="key">F</span> Fly mode</p>
+      <p><span class="key">B</span> Break block | <span class="key">P</span> Place block</p>
+      <p><span class="key">R</span> Restart</p>
+      <p style="font-size:14px; margin-top:10px;">
+        Yellow highlight shows which block you can interact with.
+      </p>
+    </div>
+  </div>
 </div>
 
-
-<p id="numdot">XXX</p>
-
-<p>
-  <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
-</p>
-
-<p>
-Camera Angle <input type="range" min="0" max="360" value="0" id="angleSlide">
-</p>
-
-<p>How to play: Get to the green box, run away from the red box.</p>
-<p>R to restart game.</p>
-<p>WASD to move, Q to pan left, E to pan right.</p>
-<p>Click and drag to look around.</p>
-<p>F to go into "fly mode."</p>
-<p>P to place block, B to break blocks</p>
-<p>Look directly at a box will make a yellow highlight appear, allowing you to break it.</p>
-
-
-
-<!-- WebGL libraries -->
 <script src="lib/webgl-utils.js"></script>
 <script src="lib/webgl-debug.js"></script>
 <script src="lib/cuon-utils.js"></script>
@@ -110,7 +219,6 @@ let isFullscreen = false;
 
 function toggleFullscreen() {
     const container = document.getElementById("gameContainer");
-
     isFullscreen = !isFullscreen;
 
     if (isFullscreen) {
@@ -128,7 +236,6 @@ function resizeCanvas() {
     const canvas = document.getElementById("webgl");
     const container = document.getElementById("gameContainer");
 
-    // Resize main canvas resolution
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
 
@@ -136,13 +243,24 @@ function resizeCanvas() {
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
 
-    // Resize minimap resolution
     const minimap = document.getElementById("minimap");
     minimap.width = minimap.clientWidth;
     minimap.height = minimap.clientHeight;
 }
 
 window.addEventListener("resize", resizeCanvas);
+
+function updateFlyUI() {
+    const status = document.getElementById("flyStatus");
+
+    if (g_flyMode) {
+        status.textContent = "Fly Mode: ON";
+        status.className = "fly-on";
+    } else {
+        status.textContent = "Fly Mode: OFF";
+        status.className = "fly-off";
+    }
+}
 </script>
 
 </body>
