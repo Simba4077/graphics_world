@@ -140,5 +140,42 @@ renderfast(){
     gl.drawArrays(gl.TRIANGLES, 0, 36);
 }
 
+
+
+  // ADD THIS NEW METHOD:
+  renderfastWithUV(uvScaleX, uvScaleY, uvOffsetX, uvOffsetY){
+    var rgba = this.color;
+    gl.uniform1i(u_whichTexture, this.textureNum);
+    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+    
+    // Scale UVs to make texture bigger
+    var scaledUVs = new Float32Array(this.cubeUVs.length);
+    for(var i = 0; i < this.cubeUVs.length; i += 2) {
+      scaledUVs[i] = this.cubeUVs[i] * uvScaleX + uvOffsetX;
+      scaledUVs[i + 1] = this.cubeUVs[i + 1] * uvScaleY + uvOffsetY;
+    }
+    
+    if(g_vertexBuffer == null){
+      initTriangle3D();
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, g_vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.cubeVerts, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_Position);
+    
+    if(g_uvBuffer == null){
+      initUVBuffer();
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, g_uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, scaledUVs, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_UV);
+    
+    gl.drawArrays(gl.TRIANGLES, 0, 36);
+  }
+
+
+
 } 
 
