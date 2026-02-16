@@ -125,16 +125,16 @@ renderfast(){
     if(g_vertexBuffer == null){
       initTriangle3D();
     }
+
+    // Bind vertex buffer and upload vertex data
+    gl.bufferData(gl.ARRAY_BUFFER, this.cubeVerts, gl.DYNAMIC_DRAW);
+    
     if(g_uvBuffer == null){
       initUVBuffer();
     }
 
-    // Bind vertex buffer and upload vertex data
-    gl.bindBuffer(gl.ARRAY_BUFFER, g_vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, this.cubeVerts, gl.DYNAMIC_DRAW);
-    
+
     // Bind UV buffer and upload UV data
-    gl.bindBuffer(gl.ARRAY_BUFFER, g_uvBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, this.cubeUVs, gl.DYNAMIC_DRAW);
     
     gl.drawArrays(gl.TRIANGLES, 0, 36);

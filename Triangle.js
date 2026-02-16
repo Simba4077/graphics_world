@@ -115,6 +115,8 @@ function initUVBuffer(){
 
 }
 
+
+//not using this function anymore
 function drawTriangle3D(vertices) {
   // var vertices = new Float32Array([
   //   0, 0.5,   -0.5, -0.5,   0.5, -0.5
@@ -131,6 +133,9 @@ function drawTriangle3D(vertices) {
   gl.drawArrays(gl.TRIANGLES,0,n);
 }
 
+
+
+//not using this function anymore
 function drawTriangle3DUV(vertices, uv) {
   var n = vertices.length / 3; // The number of vertices
 
