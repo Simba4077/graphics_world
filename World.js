@@ -1,4 +1,3 @@
-// ColoredPoint.js (c) 2012 matsuda
 // Vertex shader program
 var VSHADER_SOURCE = `
   precision mediump float;
@@ -186,6 +185,7 @@ function tick() {
   renderAllShapes();
   requestAnimationFrame(tick);
 }
+
 
 
 function handleMouseDown(ev) {
@@ -411,10 +411,70 @@ function keydown(ev) {
             g_camera.at.elements[1] -= dropAmount;
           }
         }
+    } else if(ev.keyCode == 66) { // B key - Break block
+        breakBlock();
+    } else if(ev.keyCode == 80) { // P key - Place block
+        placeBlock();
     }
     renderAllShapes();
 }
+function breakBlock() {
+    // Calculate direction vector from eye to at
+    var dirX = g_camera.at.elements[0] - g_camera.eye.elements[0];
+    var dirZ = g_camera.at.elements[2] - g_camera.eye.elements[2];
+    
+    // Get block 2 units in front of camera
+    var targetX = g_camera.eye.elements[0] + dirX * 0.05;
+    var targetZ = g_camera.eye.elements[2] + dirZ * 0.05;
+    
+    var mapX = Math.floor(targetX + 16);
+    var mapZ = Math.floor(targetZ + 16);
+    
+    console.log("Breaking at map coords:", mapX, mapZ, "world coords:", targetX, targetZ);
+    
+    // Check bounds - your map is 51x45 now!
+    if(mapX < 0 || mapX >= g_map[0].length || mapZ < 0 || mapZ >= g_map.length) {
+        console.log("Out of bounds!");
+        return;
+    }
+    
+    // Break block
+    if(g_map[mapZ][mapX] > 0) {
+        g_map[mapZ][mapX]--;
+        console.log("Broke block at", mapX, mapZ, "new height:", g_map[mapZ][mapX]);
+    } else {
+        console.log("No block to break!");
+    }
+}
 
+function placeBlock() {
+    // Calculate direction vector from eye to at
+    var dirX = g_camera.at.elements[0] - g_camera.eye.elements[0];
+    var dirZ = g_camera.at.elements[2] - g_camera.eye.elements[2];
+    
+    // Get block 2 units in front of camera
+    var targetX = g_camera.eye.elements[0] + dirX * 0.05;
+    var targetZ = g_camera.eye.elements[2] + dirZ * 0.05;
+    
+    var mapX = Math.floor(targetX + 16);
+    var mapZ = Math.floor(targetZ + 16);
+    
+    console.log("Placing at map coords:", mapX, mapZ, "world coords:", targetX, targetZ);
+    
+    // Check bounds
+    if(mapX < 0 || mapX >= g_map[0].length || mapZ < 0 || mapZ >= g_map.length) {
+        console.log("Out of bounds!");
+        return;
+    }
+    
+    // Place block
+    if(g_map[mapZ][mapX] < 10) {
+        g_map[mapZ][mapX]++;
+        console.log("Placed block at", mapX, mapZ, "new height:", g_map[mapZ][mapX]);
+    } else {
+        console.log("Already at max height!");
+    }
+}
 
 function renderAllShapes(){
 
