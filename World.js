@@ -175,8 +175,8 @@ let g_enemy = {
     x: -10,
     y: 0.75,
     z: -10,
-    speed: 0.03,
-    chaseRadius: 15,  // How far away it can detect you
+    speed: 0.1,
+    chaseRadius: 1000000000,  // How far away it can detect you
     caught: false
 };
 
@@ -637,10 +637,9 @@ function renderAllShapes(){
     updateEnemy();
     checkGoal();
     updateTargetBlock();
-    
     drawMap();
     
-    // Draw enemy (red sphere)
+    // Draw enemy (red )
     var enemy = new Cube();
     enemy.color = [1.0, 0.0, 0.0, 1.0];  // Red
     enemy.textureNum = -2;
@@ -648,7 +647,7 @@ function renderAllShapes(){
     enemy.matrix.scale(0.5, 0.5, 0.5);
     enemy.renderfast();
     
-    // Draw goal (green glowing sphere)
+    // Draw goal (green)
     var goal = new Cube();
     goal.color = [0.0, 1.0, 0.0, 1.0];  // Green
     goal.textureNum = -2;

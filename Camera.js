@@ -1,30 +1,37 @@
 class Camera{
     constructor(){
-        this.eye = new Vector3([0,.4,3]);
-        this.at = new Vector3([0,0,-100]);
+        this.eye = new Vector3([0,0.75,3]);
+        this.at = new Vector3([0,0.75,-100]);
         this.up = new Vector3([0,1,0]);
-        this.groundLevel = .75; // y-coordinate of the ground plane
+        this.groundLevel = 0.75;
     }
 
     forward(){
-        // f = at - eye
         var f = new Vector3();
         f.set(this.at);
         f.sub(this.eye);
         if(!g_flyMode){
-            f.elements[1] = 0; // prevent flying by zeroing out y component
+            f.elements[1] = 0;
         }
-        // Normalize
         f.normalize();
-     var newEye = this.eye.add(f);
-        var newAt = this.at.add(f);
         
-        // Check if new position would be below ground
+        var newEye = new Vector3();
+        newEye.set(this.eye);
+        newEye.add(f);
+        
+        var newAt = new Vector3();
+        newAt.set(this.at);
+        newAt.add(f);
+        
+        // Check collision before moving
+        if(checkCollision(newEye.elements[0], newEye.elements[2])) {
+            return; // Don't move if there's a wall
+        }
+        
         if (newEye.elements[1] >= this.groundLevel) {
             this.eye = newEye;
             this.at = newAt;
         } else {
-            // Clamp to ground level
             var yDiff = this.eye.elements[1] - newEye.elements[1];
             this.eye.elements[1] = this.groundLevel;
             this.at.elements[1] += yDiff;
@@ -32,24 +39,31 @@ class Camera{
     }
 
     back(){
-        // b = eye - at (backward vector)
         var b = new Vector3();
         b.set(this.eye);
         b.sub(this.at);
         if(!g_flyMode){
-            b.elements[1] = 0; // prevent flying by zeroing out y component
+            b.elements[1] = 0;
         }
-        // Normalize
         b.normalize();
-     var newEye = this.eye.add(b);
-        var newAt = this.at.add(b);
         
-        // Check if new position would be below ground
+        var newEye = new Vector3();
+        newEye.set(this.eye);
+        newEye.add(b);
+        
+        var newAt = new Vector3();
+        newAt.set(this.at);
+        newAt.add(b);
+        
+        // Check collision
+        if(checkCollision(newEye.elements[0], newEye.elements[2])) {
+            return;
+        }
+        
         if (newEye.elements[1] >= this.groundLevel) {
             this.eye = newEye;
             this.at = newAt;
         } else {
-            // Clamp to ground level
             var yDiff = this.eye.elements[1] - newEye.elements[1];
             this.eye.elements[1] = this.groundLevel;
             this.at.elements[1] += yDiff;
@@ -57,26 +71,32 @@ class Camera{
     }
 
     left(){
-        // f = at - eye
         var f = new Vector3();
         f.set(this.at);
         f.sub(this.eye);
-        // s = up × f
         var s = Vector3.cross(this.up, f);
         if(!g_flyMode){
-            s.elements[1] = 0; // prevent flying by zeroing out y component
+            s.elements[1] = 0;
         }
-        // Normalize
         s.normalize();
-     var newEye = this.eye.add(s);
-        var newAt = this.at.add(s);
         
-        // Check if new position would be below ground
+        var newEye = new Vector3();
+        newEye.set(this.eye);
+        newEye.add(s);
+        
+        var newAt = new Vector3();
+        newAt.set(this.at);
+        newAt.add(s);
+        
+        // Check collision
+        if(checkCollision(newEye.elements[0], newEye.elements[2])) {
+            return;
+        }
+        
         if (newEye.elements[1] >= this.groundLevel) {
             this.eye = newEye;
             this.at = newAt;
         } else {
-            // Clamp to ground level
             var yDiff = this.eye.elements[1] - newEye.elements[1];
             this.eye.elements[1] = this.groundLevel;
             this.at.elements[1] += yDiff;
@@ -84,69 +104,79 @@ class Camera{
     }
 
     right(){
-        // f = at - eye
         var f = new Vector3();
         f.set(this.at);
         f.sub(this.eye);
-        // s = f × up (opposite of left)
         var s = Vector3.cross(f, this.up);
         if(!g_flyMode){
-            s.elements[1] = 0; // prevent flying by zeroing out y component
+            s.elements[1] = 0;
         }
-        // Normalize
         s.normalize();
-     var newEye = this.eye.add(s);
-        var newAt = this.at.add(s);
         
-        // Check if new position would be below ground
+        var newEye = new Vector3();
+        newEye.set(this.eye);
+        newEye.add(s);
+        
+        var newAt = new Vector3();
+        newAt.set(this.at);
+        newAt.add(s);
+        
+        // Check collision
+        if(checkCollision(newEye.elements[0], newEye.elements[2])) {
+            return;
+        }
+        
         if (newEye.elements[1] >= this.groundLevel) {
             this.eye = newEye;
             this.at = newAt;
         } else {
-            // Clamp to ground level
             var yDiff = this.eye.elements[1] - newEye.elements[1];
             this.eye.elements[1] = this.groundLevel;
             this.at.elements[1] += yDiff;
         }
     }
 
-panLeft(){
-    // f = at - eye
-    var f = new Vector3();
-    f.set(this.at);
-    f.sub(this.eye);
-    
-    // Rotate f by alpha degrees around up vector
-    var alpha = 5; // degrees
-    var rotationMatrix = new Matrix4();
-    rotationMatrix.setRotate(alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
-    
-    // f_prime = rotationMatrix * f
-    var f_prime = rotationMatrix.multiplyVector3(f);
-    
-    // at = eye + f_prime
-    this.at = new Vector3();
-    this.at.set(this.eye);
-    this.at.add(f_prime);
+    panLeft(){
+        var f = new Vector3();
+        f.set(this.at);
+        f.sub(this.eye);
+        var alpha = 5;
+        var rotationMatrix = new Matrix4();
+        rotationMatrix.setRotate(alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        var f_prime = rotationMatrix.multiplyVector3(f);
+        this.at = new Vector3();
+        this.at.set(this.eye);
+        this.at.add(f_prime);
+    }
+
+    panRight(){
+        var f = new Vector3();
+        f.set(this.at);
+        f.sub(this.eye);
+        var alpha = -5;
+        var rotationMatrix = new Matrix4();
+        rotationMatrix.setRotate(alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        var f_prime = rotationMatrix.multiplyVector3(f);
+        this.at = new Vector3();
+        this.at.set(this.eye);
+        this.at.add(f_prime);
+    }
 }
 
-panRight(){
-    // f = at - eye
-    var f = new Vector3();
-    f.set(this.at);
-    f.sub(this.eye);
+
+function checkCollision(worldX, worldZ) {
+    var mapX = Math.floor(worldX + 16);
+    var mapZ = Math.floor(worldZ + 16);
     
-    // Rotate f by -alpha degrees around up vector
-    var alpha = -5; // negative for right
-    var rotationMatrix = new Matrix4();
-    rotationMatrix.setRotate(alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+    // Check bounds
+    if(mapX < 0 || mapX >= g_map[0].length || mapZ < 0 || mapZ >= g_map.length) {
+        return true; // Out of bounds = collision
+    }
     
-    // f_prime = rotationMatrix * f
-    var f_prime = rotationMatrix.multiplyVector3(f);
+    // Check if there's a wall
+    if(g_map[mapZ][mapX] > 0) {
+        return true; // Wall present = collision
+    }
     
-    // at = eye + f_prime
-    this.at = new Vector3();
-    this.at.set(this.eye);
-    this.at.add(f_prime);
-}
+    return false; // No collision
 }
